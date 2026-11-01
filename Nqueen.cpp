@@ -1,61 +1,69 @@
 #include <iostream>
-#include <vector>
-#include <string>
+
 using namespace std;
-class NQueensSolver {
-private:
-    int n;
-    int solutionCount;
-    vector<bool> cols;
-    vector<bool> mainDiag;
-    vector<bool> antiDiag;
-    vector< string> board;
-    void printBoard() {
-        cout << "Solution #" << solutionCount << ":\n";
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; ++j) {
-                cout << board[i][j] << " ";
-            }
-            cout << "\n";
+const int MAX_N = 10; 
+char board[MAX_N][MAX_N];
+int solutionCount = 0;
+void printBoard(int n) {
+    solutionCount++;
+    cout << "Solution #" << solutionCount << ":\n";
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            cout << board[i][j] << " ";
         }
         cout << "\n";
     }
-    void solve(int row) {
-        if (row == n) {
-            solutionCount++;
-            printBoard();
-            return;
-        }
-        for (int col = 0; col < n; ++col) {
-            int mdIdx = row - col + (n - 1);
-            int adIdx = row + col;
-            if (!cols[col] && !mainDiag[mdIdx] && !antiDiag[adIdx]) {
-                board[row][col] = 'Q';
-                cols[col] = mainDiag[mdIdx] = antiDiag[adIdx] = true;
-
-                solve(row + 1);
-
-                board[row][col] = '.';
-                cols[col] = mainDiag[mdIdx] = antiDiag[adIdx] = false;
-            }
+    cout << "\n";
+}
+// Function to check if it's safe to place a queen at board[row][col]
+bool isSafe(int row, int col, int n) {
+    for (int i = 0; i < row; i++) {
+        if (board[i][col] == 'Q') {
+            return false;
         }
     }
-public:
-    NQueensSolver(int size) : n(size), solutionCount(0) {
-        cols.assign(n, false);
-        mainDiag.assign(2 * n - 1, false);
-        antiDiag.assign(2 * n - 1, false);
-        board.assign(n,  string(n, '.'));
+// Check upper diagonal on left side
+    for (int i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+        if (board[i][j] == 'Q') {
+            return false;
+        }
     }
-    void findSolutions() {
-        solve(0);
-        cout << "Total solutions found: " << solutionCount << "\n";
+// Check upper diagonal on right side
+    for (int i = row, j = col; i >= 0 && j < n; i--, j++) {
+        if (board[i][j] == 'Q') {
+            return false;
+        }
     }
-};
+
+    return true;
+}
+// Recursive function to solve the N-Queens problem
+void solveNQueens(int row, int n) {
+    if (row == n) {
+        printBoard(n);
+        return;
+    }
+    for (int col = 0; col < n; ++col) {
+        if (isSafe(row, col, n)) {
+            board[row][col] = 'Q';
+            solveNQueens(row + 1, n);
+            board[row][col] = '.';
+        }
+    }
+}
+
 int main() {
-    int n = 4;
-    cout << "Starting N-Queens Solver for N = " << n << "\n";
-    NQueensSolver solver(n);
-    solver.findSolutions();
+    int n;
+    cout << "Enter the size of the board (N): ";
+    cin >> n;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            board[i][j] = '.';
+        }
+    }
+    solveNQueens(0, n);
+
+    cout << "Total solutions found: " << solutionCount << "\n";
     return 0;
 }
